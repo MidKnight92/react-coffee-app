@@ -25,6 +25,16 @@ class CoffeeContainer extends Component {
             console.log(err);
         }
     }
+    deleteCoffee = async (id) => {
+        console.log(id);
+        const deleteCoffeeResponse = await fetch(process.env.REACT_APP_API_URL + '/api/v1/coffees/' + id, {
+            method: 'DELETE'
+        });
+        const deleteCoffeeParsed = await deleteCoffeeResponse.json();
+        console.log(deleteCoffeeParsed);
+        this.setState({
+            coffees: this.state.coffees.filter((coffee) => coffee.id !== id) })
+    }
     addCoffee = async (e, coffeeFromTheForm) => {
         e.preventDefault();
         console.log(coffeeFromTheForm);
@@ -48,7 +58,7 @@ class CoffeeContainer extends Component {
     render() {
         return (
             <React.Fragment>
-                <CoffeeList coffees = { this.state.coffees} />
+                <CoffeeList coffees = { this.state.coffees} deleteCoffee={this.deleteCoffee} />
                 <CreateCoffee addCoffee={this.addCoffee} />
             </React.Fragment>
         )

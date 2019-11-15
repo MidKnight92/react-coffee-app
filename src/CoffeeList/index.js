@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, Segment } from 'semantic-ui-react'
+import { List, Segment, Button } from 'semantic-ui-react'
 
 function CoffeeList(props) {
     const coffee = props.coffees.map((coffee) => {
@@ -13,6 +13,8 @@ function CoffeeList(props) {
 			        	<List.Item className='acidity'>Acidity: {coffee.acidity} </List.Item>
 			        </List.Content>	
 		        	</List.Item>
+                    <Button onClick={() => props.deleteCoffee(coffee.id)}>Delete Coffee Selection</Button>
+                    <Button>Edit Coffee Selection</Button>
 	        	</List>
         	</Segment>
         )
