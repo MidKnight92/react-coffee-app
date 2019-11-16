@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
 import CoffeeList from '../CoffeeList';
 import CreateCoffee from '../CreateCoffeeForm';
+import EditCoffeeModal from '../EditCoffeeModal'
 
 class CoffeeContainer extends Component {
     constructor(props) {
         super(props);
 
         this.state = {
-            coffees: []
+            coffees: [],
+            idOfCoffeeToEdit: -1
         }
     }
     componentDidMount() {
@@ -17,7 +19,7 @@ class CoffeeContainer extends Component {
         try {
             const coffees = await fetch(process.env.REACT_APP_API_URL + '/api/v1/coffees/');
             const parsedCoffees = await coffees.json();
-            console.log(parsedCoffees);
+            // console.log(parsedCoffees);
             this.setState({
                 coffees: parsedCoffees.data
             })
@@ -26,18 +28,18 @@ class CoffeeContainer extends Component {
         }
     }
     deleteCoffee = async (id) => {
-        console.log(id);
+        // console.log(id);
         const deleteCoffeeResponse = await fetch(process.env.REACT_APP_API_URL + '/api/v1/coffees/' + id, {
             method: 'DELETE'
         });
         const deleteCoffeeParsed = await deleteCoffeeResponse.json();
-        console.log(deleteCoffeeParsed);
+        // console.log(deleteCoffeeParsed);
         this.setState({
             coffees: this.state.coffees.filter((coffee) => coffee.id !== id) })
     }
     addCoffee = async (e, coffeeFromTheForm) => {
         e.preventDefault();
-        console.log(coffeeFromTheForm);
+        // console.log(coffeeFromTheForm);
         try {
            const createdCoffeeResponse = await fetch(process.env.REACT_APP_API_URL + '/api/v1/coffees/', {
                 method: 'POST',
@@ -47,7 +49,7 @@ class CoffeeContainer extends Component {
                 }
             });
            const parsedCoffee = await createdCoffeeResponse.json();
-           console.log(parsedCoffee);
+           // console.log(parsedCoffee);
 
            this.setState({coffees: [...this.state.coffees, parsedCoffee.data]})
         }
@@ -55,11 +57,55 @@ class CoffeeContainer extends Component {
             console.log(err)
         }
     }
+    editCoffee = (idOfCoffeeToEdit) => {
+        const coffee = this.state.coffees.find(coffee => coffee.id === idOfCoffeeToEdit)
+        // console.log('We are currently editing --> ', coffee.name);
+        this.setState({
+            idOfCoffeeToEdit: idOfCoffeeToEdit
+        })
+    }
+    updateCoffee = async (newCoffeeInfo) => {
+        // console.log('This is updateCoffee with our newCoffeeInfo:\n', newCoffeeInfo);
+        try {
+             const url = process.env.REACT_APP_API_URL + '/api/v1/coffees/' + this.state.idOfCoffeeToEdit
+
+             const updateResponse = await fetch(url, {
+                method: 'PUT',
+                body: JSON.stringify(newCoffeeInfo),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+        })
+        const updateResponseParsed = await updateResponse.json()
+
+        const newCoffeeArrayWithUpdate = this.state.coffees.map((coffee) => {
+            if (coffee.id === updateResponseParsed.data.id){
+              coffee = updateResponseParsed.data  
+            }
+            return coffee
+        })
+        this.setState({
+            coffees: newCoffeeArrayWithUpdate
+        })
+        this.closeModal()
+    }
+        catch (err) {
+            console.log(err)
+        }
+    }
+    closeModal = () => {
+        this.setState({
+            idOfCoffeeToEdit: -1
+        })
+    }
     render() {
         return (
             <React.Fragment>
-                <CoffeeList coffees = { this.state.coffees} deleteCoffee={this.deleteCoffee} />
+                <CoffeeList coffees = {this.state.coffees} deleteCoffee={this.deleteCoffee} editCoffee={this.editCoffee} />
                 <CreateCoffee addCoffee={this.addCoffee} />
+                {
+                    this.state.idOfCoffeeToEdit !== -1 ? <EditCoffeeModal updateCoffee={this.updateCoffee} editCoffee={this.state.coffees.find(coffee => coffee.id === this.state.idOfCoffeeToEdit)} closeModal={this.closeModal}/> : null
+                }
             </React.Fragment>
         )
     }

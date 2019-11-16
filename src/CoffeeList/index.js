@@ -14,7 +14,7 @@ function CoffeeList(props) {
 			        </List.Content>	
 		        	</List.Item>
                     <Button onClick={() => props.deleteCoffee(coffee.id)}>Delete Coffee Selection</Button>
-                    <Button>Edit Coffee Selection</Button>
+                    <Button onClick={() => props.editCoffee(coffee.id)}>Edit Coffee Selection</Button>
 	        	</List>
         	</Segment>
         )
